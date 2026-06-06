@@ -15,6 +15,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const app = new Hono();
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
+app.get('/health', (c) => c.json({ ok: true, service: 'farmcast-api' }));
 // fire schema init once in the background — don't block every request
 initSchema().catch((err) => console.error('initSchema error:', err));
 app.route('/farms', farmsRouter);
@@ -24,5 +25,4 @@ app.route('/alerts', alertsRouter);
 app.route('/usage', usageRouter);
 app.route('/ai', aiRouter);
 app.route('/quick', quickForecastRouter);
-app.get('/health', (c) => c.json({ ok: true, service: 'farmcast-api' }));
 export default app;
