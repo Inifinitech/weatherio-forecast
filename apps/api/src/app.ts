@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { initSchema } from './lib/db.js';
 
 import farmsRouter from './routes/farms.js';
 import weatherRouter from './routes/weather.js';
@@ -18,6 +19,13 @@ const app = new Hono();
 
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
+
+const schemaReady = initSchema();
+
+app.use('*', async (c, next) => {
+  await schemaReady;
+  return next();
+});
 
 app.route('/farms', farmsRouter);
 app.route('/weather', weatherRouter);

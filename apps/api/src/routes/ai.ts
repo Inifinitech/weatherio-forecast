@@ -1,17 +1,14 @@
 import { Hono } from 'hono';
-import { farms } from '../lib/store.js';
+import { getFarmById } from '../lib/store.js';
 import { getWeather } from '../lib/weather.js';
 import { getAiActions } from '../lib/ai.js';
 
 const router = new Hono();
 
-// POST /ai/actions
-// Body: { farmId: string }
-// Returns risk level + prioritized field actions for the next 24 hours.
 router.post('/actions', async (c) => {
   const { farmId } = await c.req.json<{ farmId: string }>();
 
-  const farm = farms.find((f) => f.id === farmId);
+  const farm = await getFarmById(farmId);
   if (!farm) return c.json({ error: 'Farm not found' }, 404);
 
   let weather;

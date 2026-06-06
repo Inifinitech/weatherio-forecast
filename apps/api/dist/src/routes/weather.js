@@ -1,11 +1,9 @@
 import { Hono } from 'hono';
-import { farms } from '../lib/store.js';
+import { getFarmById } from '../lib/store.js';
 import { getWeather } from '../lib/weather.js';
 const router = new Hono();
-// GET /weather/farm/:farmId?days=7
-// Returns full weather + forecast for a registered farm
 router.get('/farm/:farmId', async (c) => {
-    const farm = farms.find((f) => f.id === c.req.param('farmId'));
+    const farm = await getFarmById(c.req.param('farmId'));
     if (!farm)
         return c.json({ error: 'Farm not found' }, 404);
     const days = Math.min(Number(c.req.query('days') ?? 7), 7);

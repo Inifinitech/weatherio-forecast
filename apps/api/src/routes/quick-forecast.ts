@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { farms } from '../lib/store.js';
+import { getFarms } from '../lib/store.js';
 import { getWeather } from '../lib/weather.js';
 import { getAiActions } from '../lib/ai.js';
 import type { Farm } from '@fieldpulse/types';
@@ -54,13 +54,13 @@ router.post('/forecast', async (c) => {
 // Groups by county and rainfall risk level.
 router.get('/zones/risk-summary', async (c) => {
   try {
+    const allFarms = await getFarms();
     const zoneData: Record<
       string,
       { county: string; farms: { name: string; rainfall: number; riskLevel: 'Normal' | 'Watch' | 'Act Now' }[]; maxRainfall: number; aggregateRisk: 'Normal' | 'Watch' | 'Act Now' }
     > = {};
 
-    // Fetch weather for each farm and compute risk
-    for (const farm of farms) {
+    for (const farm of allFarms) {
       const weather = await getWeather(farm.lat, farm.lon, 1);
       const todayRain = weather.daily[0]?.precip_mm ?? 0;
 
@@ -112,7 +112,7 @@ router.get('/zones/risk-summary', async (c) => {
 
     return c.json({
       zones,
-      totalFarms: farms.length,
+      totalFarms: allFarms.length,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

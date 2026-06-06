@@ -1,22 +1,19 @@
 import { Hono } from 'hono';
-import { farms } from '../lib/store.js';
+import { getFarms, getFarmById, createFarm, deleteFarm } from '../lib/store.js';
 import type { CreateFarmInput, Farm } from '@fieldpulse/types';
 
 const router = new Hono();
 
-// GET /farms — list all farms
-router.get('/', (c) => {
-  return c.json(farms);
+router.get('/', async (c) => {
+  return c.json(await getFarms());
 });
 
-// GET /farms/:id — get one farm
-router.get('/:id', (c) => {
-  const farm = farms.find((f) => f.id === c.req.param('id'));
+router.get('/:id', async (c) => {
+  const farm = await getFarmById(c.req.param('id'));
   if (!farm) return c.json({ error: 'Farm not found' }, 404);
   return c.json(farm);
 });
 
-// POST /farms — register a new farm
 router.post('/', async (c) => {
   const body = await c.req.json<CreateFarmInput>();
 
@@ -35,15 +32,12 @@ router.post('/', async (c) => {
     bomRegistered: false,
   };
 
-  farms.push(farm);
-  return c.json(farm, 201);
+  return c.json(await createFarm(farm), 201);
 });
 
-// DELETE /farms/:id — remove a farm
-router.delete('/:id', (c) => {
-  const idx = farms.findIndex((f) => f.id === c.req.param('id'));
-  if (idx === -1) return c.json({ error: 'Farm not found' }, 404);
-  farms.splice(idx, 1);
+router.delete('/:id', async (c) => {
+  const deleted = await deleteFarm(c.req.param('id'));
+  if (!deleted) return c.json({ error: 'Farm not found' }, 404);
   return c.json({ ok: true });
 });
 
