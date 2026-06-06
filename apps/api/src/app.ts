@@ -22,8 +22,10 @@ app.use('*', logger());
 
 app.get('/health', (c) => c.json({ ok: true, service: 'farmcast-api' }));
 
-// fire schema init once in the background — don't block every request
-initSchema().catch((err) => console.error('initSchema error:', err));
+// fire schema init in background — must not block module load
+setTimeout(() => {
+  initSchema().catch((err) => console.error('initSchema error:', err));
+}, 0);
 
 app.route('/farms', farmsRouter);
 app.route('/weather', weatherRouter);
