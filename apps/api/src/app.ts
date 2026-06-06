@@ -20,13 +20,8 @@ const app = new Hono();
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
 
-let schemaReady: Promise<void> | null = null;
-
-app.use('*', async (c, next) => {
-  if (!schemaReady) schemaReady = initSchema();
-  await schemaReady;
-  return next();
-});
+// fire schema init once in the background — don't block every request
+initSchema().catch((err) => console.error('initSchema error:', err));
 
 app.route('/farms', farmsRouter);
 app.route('/weather', weatherRouter);

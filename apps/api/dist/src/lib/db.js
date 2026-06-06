@@ -5,47 +5,46 @@ export async function initSchema() {
     if (!sql)
         return;
     try {
-        await sql `SELECT 1`; // verify connection early
         await sql `
-    CREATE TABLE IF NOT EXISTS farms (
-      id          TEXT PRIMARY KEY,
-      name        TEXT NOT NULL,
-      farmer      TEXT NOT NULL,
-      phone       TEXT NOT NULL,
-      county      TEXT NOT NULL,
-      lat         DOUBLE PRECISION NOT NULL,
-      lon         DOUBLE PRECISION NOT NULL,
-      land_acres  DOUBLE PRECISION NOT NULL,
-      crop_type   TEXT NOT NULL,
-      notes       TEXT NOT NULL DEFAULT '',
-      created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-      bom_registered BOOLEAN NOT NULL DEFAULT FALSE
-    )
-  `;
+      CREATE TABLE IF NOT EXISTS farms (
+        id          TEXT PRIMARY KEY,
+        name        TEXT NOT NULL,
+        farmer      TEXT NOT NULL,
+        phone       TEXT NOT NULL,
+        county      TEXT NOT NULL,
+        lat         DOUBLE PRECISION NOT NULL,
+        lon         DOUBLE PRECISION NOT NULL,
+        land_acres  DOUBLE PRECISION NOT NULL,
+        crop_type   TEXT NOT NULL,
+        notes       TEXT NOT NULL DEFAULT '',
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+        bom_registered BOOLEAN NOT NULL DEFAULT FALSE
+      )
+    `;
         await sql `
-    CREATE TABLE IF NOT EXISTS alerts (
-      id          TEXT PRIMARY KEY,
-      farm_id     TEXT NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
-      metric      TEXT NOT NULL,
-      operator    TEXT NOT NULL,
-      threshold   DOUBLE PRECISION NOT NULL,
-      message     TEXT NOT NULL,
-      active      BOOLEAN NOT NULL DEFAULT TRUE,
-      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-    )
-  `;
+      CREATE TABLE IF NOT EXISTS alerts (
+        id          TEXT PRIMARY KEY,
+        farm_id     TEXT NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
+        metric      TEXT NOT NULL,
+        operator    TEXT NOT NULL,
+        threshold   DOUBLE PRECISION NOT NULL,
+        message     TEXT NOT NULL,
+        active      BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `;
         await sql `
-    CREATE TABLE IF NOT EXISTS tree_scans (
-      id            TEXT PRIMARY KEY,
-      farm_id       TEXT NOT NULL,
-      image_url     TEXT,
-      health_score  INTEGER,
-      canopy_cover  DOUBLE PRECISION,
-      issues        JSONB NOT NULL DEFAULT '[]',
-      recommendations JSONB NOT NULL DEFAULT '[]',
-      analyzed_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-    )
-  `;
+      CREATE TABLE IF NOT EXISTS tree_scans (
+        id            TEXT PRIMARY KEY,
+        farm_id       TEXT NOT NULL,
+        image_url     TEXT,
+        health_score  INTEGER,
+        canopy_cover  DOUBLE PRECISION,
+        issues        JSONB NOT NULL DEFAULT '[]',
+        recommendations JSONB NOT NULL DEFAULT '[]',
+        analyzed_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `;
         await seedIfEmpty();
     }
     catch (err) {
