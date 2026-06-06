@@ -20,9 +20,10 @@ const app = new Hono();
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
 
-const schemaReady = initSchema();
+let schemaReady: Promise<void> | null = null;
 
 app.use('*', async (c, next) => {
+  if (!schemaReady) schemaReady = initSchema();
   await schemaReady;
   return next();
 });

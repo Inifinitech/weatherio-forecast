@@ -1,12 +1,12 @@
 import { neon } from '@neondatabase/serverless';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is not set');
-}
-
-export const sql = neon(process.env.DATABASE_URL);
+export const DATABASE_URL = process.env.DATABASE_URL ?? null;
+export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
 
 export async function initSchema() {
+  if (!sql) return;
+  try {
+    await sql`SELECT 1`; // verify connection early
   await sql`
     CREATE TABLE IF NOT EXISTS farms (
       id          TEXT PRIMARY KEY,
@@ -50,10 +50,15 @@ export async function initSchema() {
     )
   `;
 
-  await seedIfEmpty();
+    await seedIfEmpty();
+  } catch (err) {
+    console.error('initSchema failed:', err);
+    throw err;
+  }
 }
 
 async function seedIfEmpty() {
+  if (!sql) return;
   const rows = await sql`SELECT COUNT(*) AS count FROM farms`;
   if (Number(rows[0].count) > 0) return;
 

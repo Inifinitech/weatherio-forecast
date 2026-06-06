@@ -1,10 +1,12 @@
 import { neon } from '@neondatabase/serverless';
-if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is not set');
-}
-export const sql = neon(process.env.DATABASE_URL);
+export const DATABASE_URL = process.env.DATABASE_URL ?? null;
+export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
 export async function initSchema() {
-    await sql `
+    if (!sql)
+        return;
+    try {
+        await sql `SELECT 1`; // verify connection early
+        await sql `
     CREATE TABLE IF NOT EXISTS farms (
       id          TEXT PRIMARY KEY,
       name        TEXT NOT NULL,
@@ -20,7 +22,7 @@ export async function initSchema() {
       bom_registered BOOLEAN NOT NULL DEFAULT FALSE
     )
   `;
-    await sql `
+        await sql `
     CREATE TABLE IF NOT EXISTS alerts (
       id          TEXT PRIMARY KEY,
       farm_id     TEXT NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
@@ -32,7 +34,7 @@ export async function initSchema() {
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
-    await sql `
+        await sql `
     CREATE TABLE IF NOT EXISTS tree_scans (
       id            TEXT PRIMARY KEY,
       farm_id       TEXT NOT NULL,
@@ -44,9 +46,16 @@ export async function initSchema() {
       analyzed_at   TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
-    await seedIfEmpty();
+        await seedIfEmpty();
+    }
+    catch (err) {
+        console.error('initSchema failed:', err);
+        throw err;
+    }
 }
 async function seedIfEmpty() {
+    if (!sql)
+        return;
     const rows = await sql `SELECT COUNT(*) AS count FROM farms`;
     if (Number(rows[0].count) > 0)
         return;

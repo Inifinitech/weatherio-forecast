@@ -15,8 +15,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const app = new Hono();
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
-const schemaReady = initSchema();
+let schemaReady = null;
 app.use('*', async (c, next) => {
+    if (!schemaReady)
+        schemaReady = initSchema();
     await schemaReady;
     return next();
 });
