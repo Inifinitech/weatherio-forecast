@@ -34,7 +34,7 @@ Exposes billing period stats (total requests, AI requests, plan limits) from the
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 14 (App Router), Tailwind CSS, Recharts, TanStack Query |
-| Backend | Hono (Edge-compatible), deployed as a Vercel Edge Function |
+| Backend | Node.js (Hono framework), deployed as a Vercel Edge Function |
 | Database | Neon (serverless Postgres) — persists farms, alerts, and tree scans |
 | AI | Groq API — Llama 3.3 70B Versatile |
 | Weather | WeatherAI API (mock-data fallback in dev) |
