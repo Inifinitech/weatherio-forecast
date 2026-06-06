@@ -1,31 +1,6 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-
-import farmsRouter from './routes/farms.js';
-import weatherRouter from './routes/weather.js';
-import treesRouter from './routes/trees.js';
-import alertsRouter from './routes/alerts.js';
-import usageRouter from './routes/usage.js';
-import aiRouter from './routes/ai.js';
-import quickForecastRouter from './routes/quick-forecast.js';
-
-const app = new Hono();
-
-app.use('*', cors({ origin: ['http://localhost:3000'] }));
-app.use('*', logger());
-
-app.route('/farms', farmsRouter);
-app.route('/weather', weatherRouter);
-app.route('/trees', treesRouter);
-app.route('/alerts', alertsRouter);
-app.route('/usage', usageRouter);
-app.route('/ai', aiRouter);
-app.route('/quick', quickForecastRouter);
-
-app.get('/health', (c) => c.json({ ok: true, service: 'farmcast-api' }));
+import app from './app.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
 
