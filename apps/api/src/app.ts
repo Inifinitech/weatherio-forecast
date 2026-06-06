@@ -20,7 +20,7 @@ const app = new Hono();
 app.use('*', cors({ origin: allowedOrigins }));
 app.use('*', logger());
 
-app.get('/health', (c) => c.json({ ok: true, service: 'farmcast-api' }));
+app.get('/health', (c) => c.json({ ok: true, service: 'fieldcast-api' }));
 
 // fire schema init in background — must not block module load
 setTimeout(() => {
